@@ -2,11 +2,29 @@ package com.liceo.prelim.profilecard
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
-import androidx.compose.material3.*
+import androidx.compose.material.icons.filled.Class
+import androidx.compose.material.icons.filled.Email
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Phone
+import androidx.compose.material.icons.filled.School
+import androidx.compose.material3.Card
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -71,7 +89,6 @@ fun ProfileScreen() {
                 modifier = Modifier.padding(16.dp)
             ) {
                 // Task 5 — Reusable InfoRow (×5)
-                // Order: Full Name, Course, Section, Mobile Number, Email Address
                 InfoRow(
                     icon = Icons.Default.Person,
                     label = "Full Name",
@@ -102,7 +119,6 @@ fun ProfileScreen() {
     }
 }
 
-// Task 5 — Reusable InfoRow
 @Composable
 fun InfoRow(icon: ImageVector, label: String, value: String) {
     Row(
@@ -132,11 +148,10 @@ fun InfoRow(icon: ImageVector, label: String, value: String) {
     }
 }
 
-// Task 6 — Verify light AND dark
 @Preview(showBackground = true, name = "Profile — Light")
 @Composable
 fun ProfilePreview() {
-    MyApplicationTheme(darkTheme = false) {
+    MyApplicationTheme {
         Surface(color = MaterialTheme.colorScheme.background) {
             ProfileScreen()
         }
