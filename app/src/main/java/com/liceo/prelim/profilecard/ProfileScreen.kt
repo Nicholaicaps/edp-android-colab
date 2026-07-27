@@ -2,29 +2,16 @@ package com.liceo.prelim.profilecard
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.BatteryFull
 import androidx.compose.material.icons.filled.Class
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Phone
 import androidx.compose.material.icons.filled.School
-import androidx.compose.material3.Card
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -36,86 +23,124 @@ import com.example.myapplication.ui.theme.MyApplicationTheme
 
 @Composable
 fun ProfileScreen() {
-    // Task 1 — Center the layout
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
+            .background(MaterialTheme.colorScheme.background)
     ) {
-        // Task 2 — Circular avatar
-        Box(
-            modifier = Modifier
-                .size(120.dp)
-                .clip(CircleShape)
-                .background(MaterialTheme.colorScheme.primary)
-                .border(2.dp, MaterialTheme.colorScheme.onPrimary, CircleShape),
-            contentAlignment = Alignment.Center
-        ) {
-            Text(
-                text = "RJ",
-                color = MaterialTheme.colorScheme.onPrimary,
-                style = MaterialTheme.typography.headlineSmall
-            )
-        }
-
-        Spacer(modifier = Modifier.height(24.dp))
-
-        // Task 3 — Full name & subtitle
-        Text(
-            text = "Nicholai Patrick Capinpuyan",
-            style = MaterialTheme.typography.headlineSmall,
-            color = MaterialTheme.colorScheme.primary
-        )
-        
-        Spacer(modifier = Modifier.height(8.dp))
-        
-        Text(
-            text = "BSIT 3-A",
-            style = MaterialTheme.typography.titleMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-
-        Spacer(modifier = Modifier.height(32.dp))
-
-        // Task 4 — The Info Card
-        Card(
+        // Simulated Status Bar (Matching Wireframe)
+        Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 24.dp)
+                .padding(horizontal = 24.dp, vertical = 12.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Column(
-                modifier = Modifier.padding(16.dp)
-            ) {
-                // Task 5 — Reusable InfoRow (×5)
-                InfoRow(
-                    icon = Icons.Default.Person,
-                    label = "Full Name",
-                    value = "Nicholai Patrick Capinpuyan"
+            Text(
+                text = "9:41",
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    text = "100%",
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurface
                 )
-                InfoRow(
-                    icon = Icons.Default.School,
-                    label = "Course",
-                    value = "Bachelor of Science in Information Technology"
-                )
-                InfoRow(
-                    icon = Icons.Default.Class,
-                    label = "Section",
-                    value = "3-A"
-                )
-                InfoRow(
-                    icon = Icons.Default.Phone,
-                    label = "Mobile Number",
-                    value = "+63 912 345 6789"
-                )
-                InfoRow(
-                    icon = Icons.Default.Email,
-                    label = "Email Address",
-                    value = "ncapinpuyan@example.com"
+                Spacer(modifier = Modifier.width(4.dp))
+                Icon(
+                    imageVector = Icons.Default.BatteryFull,
+                    contentDescription = null,
+                    modifier = Modifier.size(16.dp),
+                    tint = MaterialTheme.colorScheme.onSurface
                 )
             }
         }
+
+        // Main Layout - Task 1: Center the layout
+        Column(
+            modifier = Modifier
+                .weight(1f)
+                .fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            // Task 2 — Circular avatar
+            Box(
+                modifier = Modifier
+                    .size(120.dp)
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.primary)
+                    .border(2.dp, MaterialTheme.colorScheme.onPrimary, CircleShape),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = "INI", // Placeholder from wireframe
+                    color = MaterialTheme.colorScheme.onPrimary,
+                    style = MaterialTheme.typography.headlineSmall
+                )
+            }
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            // Task 3 — Full name & subtitle
+            Text(
+                text = "Nicholai Patrick Capinpuyan",
+                style = MaterialTheme.typography.headlineSmall,
+                color = MaterialTheme.colorScheme.primary
+            )
+            
+            Spacer(modifier = Modifier.height(8.dp))
+            
+            Text(
+                text = "BSIT 3-A",
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+
+            Spacer(modifier = Modifier.height(32.dp))
+
+            // Task 4 — The Info Card
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 24.dp)
+            ) {
+                Column(
+                    modifier = Modifier.padding(16.dp)
+                ) {
+                    // Task 5 — Reusable InfoRow (×5)
+                    InfoRow(
+                        icon = Icons.Default.Person,
+                        label = "Full Name",
+                        value = "Nicholai Patrick Capinpuyan"
+                    )
+                    InfoRow(
+                        icon = Icons.Default.School,
+                        label = "Course",
+                        value = "Bachelor of Science in Information Technology"
+                    )
+                    InfoRow(
+                        icon = Icons.Default.Class,
+                        label = "Section",
+                        value = "3-A"
+                    )
+                    InfoRow(
+                        icon = Icons.Default.Phone,
+                        label = "Mobile Number",
+                        value = "+63 912 345 6789"
+                    )
+                    InfoRow(
+                        icon = Icons.Default.Email,
+                        label = "Email Address",
+                        value = "ncapinpuyan@example.com"
+                    )
+                }
+            }
+        }
+        
+        // Bottom spacer to balance the status bar
+        Spacer(modifier = Modifier.height(48.dp))
     }
 }
 
@@ -151,7 +176,7 @@ fun InfoRow(icon: ImageVector, label: String, value: String) {
 @Preview(showBackground = true, name = "Profile — Light")
 @Composable
 fun ProfilePreview() {
-    MyApplicationTheme {
+    MyApplicationTheme(dynamicColor = false) {
         Surface(color = MaterialTheme.colorScheme.background) {
             ProfileScreen()
         }
@@ -161,7 +186,7 @@ fun ProfilePreview() {
 @Preview(showBackground = true, name = "Profile — Dark", uiMode = android.content.res.Configuration.UI_MODE_NIGHT_YES)
 @Composable
 fun ProfileDarkPreview() {
-    MyApplicationTheme(darkTheme = true) {
+    MyApplicationTheme(darkTheme = true, dynamicColor = false) {
         Surface(color = MaterialTheme.colorScheme.background) {
             ProfileScreen()
         }
