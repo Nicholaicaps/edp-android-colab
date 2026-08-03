@@ -31,10 +31,8 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun ReactiveScreen() {
-    // Part A: 'count' state
     var count by remember { mutableStateOf(0) }
-    
-    // Part B & C: 'name' state using rememberSaveable to survive rotation
+
     var name by rememberSaveable { mutableStateOf("") }
 
     Column(
@@ -44,7 +42,6 @@ fun ReactiveScreen() {
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        // Part B: Greeting reacts as you type
         Text(
             text = if (name.isBlank()) "Hello, Nicholai!"
             else "Hello, $name!",
@@ -72,7 +69,7 @@ fun ReactiveScreen() {
     }
 }
 
-// Part D (Bonus): Stateless counter component (State Hoisting)
+
 @Composable
 fun CounterControls(
     count: Int, // value flows DOWN
