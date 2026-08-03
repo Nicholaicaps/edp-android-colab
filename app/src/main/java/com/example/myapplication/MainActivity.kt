@@ -4,14 +4,12 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
@@ -24,7 +22,7 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    GroceryListApp()
+                    ReactiveScreen()
                 }
             }
         }
@@ -32,65 +30,65 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun GroceryListApp() {
+fun ReactiveScreen() {
+    // Part A: 'count' state
+    var count by remember { mutableStateOf(0) }
+    
+    // Part B & C: 'name' state using rememberSaveable to survive rotation
+    var name by rememberSaveable { mutableStateOf("") }
 
-    var newItem by remember { mutableStateOf("") }
-    val groceries = remember { mutableStateListOf<String>() }
-
-    Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
-        Text(text = "My Grocery List", fontSize = 24.sp)
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(24.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        // Part B: Greeting reacts as you type
+        Text(
+            text = if (name.isBlank()) "Hello, Nicholai!"
+            else "Hello, $name!",
+            fontSize = 26.sp,
+            fontWeight = FontWeight.Bold
+        )
         
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(Modifier.height(16.dp))
+        
+        OutlinedTextField(
+            value = name,
+            onValueChange = { name = it },
+            label = { Text("Enter your name") }
+        )
+        
+        Spacer(Modifier.height(32.dp))
 
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            OutlinedTextField(
-                value = newItem,
-                onValueChange = { newItem = it },
-                label = { Text("Enter an item") },
-                modifier = Modifier.weight(1f)
-            )
-            Spacer(modifier = Modifier.width(8.dp))
-            Button(onClick = {
-                if (newItem.isNotBlank()) {
-                    groceries.add(newItem.trim()) // add typed text to the list
-                    newItem = "" // clear the input box
-                }
-            }) {
-                Text("Add")
-            }
-        }
+        // Part D (Bonus): Using the hoisted stateless counter component
+        CounterControls(
+            count = count,
+            onIncrement = { count++ },
+            onDecrement = { count-- },
+            onReset = { count = 0 }
+        )
+    }
+}
 
-        Spacer(modifier = Modifier.height(8.dp))
-
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(text = "Total items: ${groceries.size}", fontSize = 16.sp)
-
-            if (groceries.isNotEmpty()) {
-                TextButton(onClick = { groceries.clear() }) {
-                    Text("Clear All", color = MaterialTheme.colorScheme.error)
-                }
-            }
-        }
-
-        HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
-
-        LazyColumn {
-            items(groceries) { item ->
-                Row(
-                    modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(text = item, fontSize = 18.sp)
-                    IconButton(onClick = { groceries.remove(item) }) {
-                        Icon(Icons.Filled.Delete, contentDescription = "Delete")
-                    }
-                }
-            }
+// Part D (Bonus): Stateless counter component (State Hoisting)
+@Composable
+fun CounterControls(
+    count: Int, // value flows DOWN
+    onIncrement: () -> Unit, // events flow UP
+    onDecrement: () -> Unit,
+    onReset: () -> Unit
+) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Text(text = "Count: $count", fontSize = 24.sp)
+        
+        Spacer(Modifier.height(16.dp))
+        
+        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            Button(onClick = onDecrement) { Text("–") }
+            Button(onClick = onReset) { Text("Reset") }
+            Button(onClick = onIncrement) { Text("+") }
         }
     }
 }
