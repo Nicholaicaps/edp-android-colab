@@ -33,10 +33,8 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun GroceryListApp() {
-    // ---- 1. STATE ----
-    // The current text in the input box
+
     var newItem by remember { mutableStateOf("") }
-    // The list of grocery items (observable, so the UI updates)
     val groceries = remember { mutableStateListOf<String>() }
 
     Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
@@ -44,7 +42,6 @@ fun GroceryListApp() {
         
         Spacer(modifier = Modifier.height(16.dp))
 
-        // ---- 2. INPUT + ADD EVENT ----
         Row(verticalAlignment = Alignment.CenterVertically) {
             OutlinedTextField(
                 value = newItem,
@@ -54,7 +51,6 @@ fun GroceryListApp() {
             )
             Spacer(modifier = Modifier.width(8.dp))
             Button(onClick = {
-                // Challenge 1: Ignore empty items
                 if (newItem.isNotBlank()) {
                     groceries.add(newItem.trim()) // add typed text to the list
                     newItem = "" // clear the input box
@@ -66,15 +62,13 @@ fun GroceryListApp() {
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        // Challenge 2: Show a live item count
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(text = "Total items: ${groceries.size}", fontSize = 16.sp)
-            
-            // Optional bonus: Clear All button
+
             if (groceries.isNotEmpty()) {
                 TextButton(onClick = { groceries.clear() }) {
                     Text("Clear All", color = MaterialTheme.colorScheme.error)
@@ -84,7 +78,6 @@ fun GroceryListApp() {
 
         HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
 
-        // ---- 3. LIST + DELETE EVENT ----
         LazyColumn {
             items(groceries) { item ->
                 Row(
