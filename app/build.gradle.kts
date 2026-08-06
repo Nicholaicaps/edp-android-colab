@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
+    id("org.jetbrains.kotlin.plugin.serialization") version "2.2.10"
 }
 
 android {
@@ -47,6 +48,12 @@ dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation("androidx.compose.material:material-icons-extended")
+
+    // Navigation for Compose
+    implementation("androidx.navigation:navigation-compose:2.9.8")
+    // Needed for @Serializable type-safe routes
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3")
+
     testImplementation(libs.junit)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)

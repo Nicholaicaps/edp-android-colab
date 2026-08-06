@@ -3,26 +3,28 @@ package com.example.myapplication
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.layout.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.ui.Alignment
+import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import androidx.navigation.toRoute
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
         setContent {
             MaterialTheme {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    ReactiveScreen()
+                    GreetingApp()
                 }
             }
         }
@@ -30,62 +32,19 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun ReactiveScreen() {
-    var count by remember { mutableStateOf(0) }
-
-    var name by rememberSaveable { mutableStateOf("") }
-
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(24.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        Text(
-            text = if (name.isBlank()) "Hello, Nicholai!"
-            else "Hello, $name!",
-            fontSize = 26.sp,
-            fontWeight = FontWeight.Bold
-        )
-        
-        Spacer(Modifier.height(16.dp))
-        
-        OutlinedTextField(
-            value = name,
-            onValueChange = { name = it },
-            label = { Text("Enter your name") }
-        )
-        
-        Spacer(Modifier.height(32.dp))
-
-        // Part D (Bonus): Using the hoisted stateless counter component
-        CounterControls(
-            count = count,
-            onIncrement = { count++ },
-            onDecrement = { count-- },
-            onReset = { count = 0 }
-        )
-    }
-}
-
-
-@Composable
-fun CounterControls(
-    count: Int, // value flows DOWN
-    onIncrement: () -> Unit, // events flow UP
-    onDecrement: () -> Unit,
-    onReset: () -> Unit
-) {
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        Text(text = "Count: $count", fontSize = 24.sp)
-        
-        Spacer(Modifier.height(16.dp))
-        
-        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            Button(onClick = onDecrement) { Text("–") }
-            Button(onClick = onReset) { Text("Reset") }
-            Button(onClick = onIncrement) { Text("+") }
+fun GreetingApp() {
+    val navController = rememberNavController()
+    NavHost(navController = navController, startDestination = Home) {
+        composable<Home> {
+            HomeScreen(onShowGreeting = { typedName ->
+                // Pass the name by creating a Greeting route object
+                navController.navigate(Greeting(userName = typedName))
+            })
+        }
+        composable<Greeting> { backStackEntry ->
+            // Rebuild the typed Greeting object on this screen
+            val greeting: Greeting = backStackEntry.toRoute()
+            GreetingScreen(userName = greeting.userName)
         }
     }
 }
