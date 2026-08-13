@@ -34,11 +34,11 @@ class ProfileViewModel : ViewModel() {
     // --- Add / remove skills ---
     fun addSkill() {
         val skill = _uiState.value.newSkill.trim()
-        if (skill.isEmpty()) return // ignore empty input
+        if (skill.isEmpty() || _uiState.value.skills.contains(skill)) return
         _uiState.update { current ->
             current.copy(
-                skills = current.skills + skill, // new list = old + one
-                newSkill = "" // clear the input box
+                skills = current.skills + skill,
+                newSkill = ""
             )
         }
     }
@@ -47,6 +47,11 @@ class ProfileViewModel : ViewModel() {
         _uiState.update { current ->
             current.copy(skills = current.skills - skill)
         }
+    }
+
+    // --- Bonus: Clear all ---
+    fun clearAll() {
+        _uiState.value = ProfileUiState()
     }
 
     // --- Preview toggle ---
