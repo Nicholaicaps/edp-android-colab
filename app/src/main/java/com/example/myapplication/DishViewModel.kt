@@ -4,22 +4,26 @@ import androidx.lifecycle.ViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 
 class DishViewModel : ViewModel() {
     private val _dishes = MutableStateFlow(
         listOf(
-            Dish(id = 1, name = "Chicken Adobo"),
-            Dish(id = 2, name = "Sinigang na Baboy")
+            Dish(id = 1, name = "Lumpiang Shanghai"),
+            Dish(id = 2, name = "Lechon Kawali"),
+            Dish(id = 3, name = "Bulalo")
         )
     )
     val dishes: StateFlow<List<Dish>> = _dishes.asStateFlow()
 
-    private var nextId = 100
+    private var currentIdCounter = 100
 
     fun addDish(name: String) {
-        if (name.isBlank()) return
-        val newDish = Dish(id = nextId++, name = name.trim())
-        _dishes.value = _dishes.value + newDish
+        val cleanName = name.trim()
+        if (cleanName.isEmpty()) return
+        
+        val newEntry = Dish(id = currentIdCounter++, name = cleanName)
+        _dishes.update { it + newEntry }
     }
 
     fun getDish(dishId: Int): Dish? {
@@ -27,47 +31,55 @@ class DishViewModel : ViewModel() {
     }
 
     fun updateDish(dishId: Int, newName: String) {
-        if (newName.isBlank()) return
-        _dishes.value = _dishes.value.map { dish ->
-            if (dish.id == dishId) dish.copy(name = newName.trim()) else dish
+        val cleanName = newName.trim()
+        if (cleanName.isEmpty()) return
+        
+        _dishes.update { list ->
+            list.map { if (it.id == dishId) it.copy(name = cleanName) else it }
         }
     }
 
     fun deleteDish(dishId: Int) {
-        _dishes.value = _dishes.value.filter { it.id != dishId }
+        _dishes.update { list ->
+            list.filter { it.id != dishId }
+        }
     }
 
     fun addRecipe(dishId: Int, text: String) {
-        if (text.isBlank()) return
-        _dishes.value = _dishes.value.map { dish ->
-            if (dish.id == dishId) {
-                val newRecipe = Recipe(id = nextId++, text = text.trim())
-                dish.copy(recipes = dish.recipes + newRecipe)
-            } else {
-                dish
+        val cleanText = text.trim()
+        if (cleanText.isEmpty()) return
+        
+        _dishes.update { list ->
+            list.map { dish ->
+                if (dish.id == dishId) {
+                    val newRecipe = Recipe(id = currentIdCounter++, text = cleanText)
+                    dish.copy(recipes = dish.recipes + newRecipe)
+                } else dish
             }
         }
     }
 
     fun updateRecipe(dishId: Int, recipeId: Int, newText: String) {
-        if (newText.isBlank()) return
-        _dishes.value = _dishes.value.map { dish ->
-            if (dish.id == dishId) {
-                dish.copy(recipes = dish.recipes.map { recipe ->
-                    if (recipe.id == recipeId) recipe.copy(text = newText.trim()) else recipe
-                })
-            } else {
-                dish
+        val cleanText = newText.trim()
+        if (cleanText.isEmpty()) return
+
+        _dishes.update { list ->
+            list.map { dish ->
+                if (dish.id == dishId) {
+                    dish.copy(recipes = dish.recipes.map { recipe ->
+                        if (recipe.id == recipeId) recipe.copy(text = cleanText) else recipe
+                    })
+                } else dish
             }
         }
     }
 
     fun deleteRecipe(dishId: Int, recipeId: Int) {
-        _dishes.value = _dishes.value.map { dish ->
-            if (dish.id == dishId) {
-                dish.copy(recipes = dish.recipes.filter { it.id != recipeId })
-            } else {
-                dish
+        _dishes.update { list ->
+            list.map { dish ->
+                if (dish.id == dishId) {
+                    dish.copy(recipes = dish.recipes.filter { it.id != recipeId })
+                } else dish
             }
         }
     }

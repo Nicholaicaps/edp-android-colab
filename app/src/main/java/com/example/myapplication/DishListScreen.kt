@@ -1,296 +1,117 @@
 package com.example.myapplication
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.Restaurant
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ElevatedCard
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
-@OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DishListScreen(
     viewModel: DishViewModel,
     onDishClick: (Int) -> Unit
 ) {
     val dishes by viewModel.dishes.collectAsStateWithLifecycle()
-
-    var newDishName by remember {
-        mutableStateOf("")
-    }
-
-    var dishBeingEdited by remember {
-        mutableStateOf<Dish?>(null)
-    }
+    var inputName by remember { mutableStateOf("") }
+    var editingDish by remember { mutableStateOf<Dish?>(null) }
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = {
-                    Column {
-                        Text(
-                            text = "My Recipe Book",
-                            style = MaterialTheme.typography.titleLarge
-                        )
-
-                        Text(
-                            text = "${dishes.size} dishes",
-                            style = MaterialTheme.typography.bodySmall
-                        )
-                    }
-                },
+                title = { Text("MyRecipeBook", fontWeight = FontWeight.Bold) },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    titleContentColor = MaterialTheme.colorScheme.onPrimary
+                    containerColor = MaterialTheme.colorScheme.background
                 )
             )
         }
-    ) { paddingValues ->
-
+    ) { innerPadding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .background(MaterialTheme.colorScheme.surface)
-                .padding(paddingValues)
-                .padding(horizontal = 16.dp)
+                .padding(innerPadding)
+                .padding(horizontal = 20.dp)
         ) {
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            Text(
-                text = "Add a new dish",
-                style = MaterialTheme.typography.titleMedium
-            )
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            Row(
+            OutlinedTextField(
+                value = inputName,
+                onValueChange = { inputName = it },
+                placeholder = { Text("What are we cooking?") },
                 modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-
-                OutlinedTextField(
-                    value = newDishName,
-                    onValueChange = {
-                        newDishName = it
-                    },
-                    modifier = Modifier.weight(1f),
-                    singleLine = true,
-                    shape = RoundedCornerShape(16.dp),
-                    placeholder = {
-                        Text("Dish name")
+                shape = RoundedCornerShape(16.dp),
+                trailingIcon = {
+                    IconButton(onClick = {
+                        viewModel.addDish(inputName)
+                        inputName = ""
+                    }) {
+                        Icon(Icons.Default.Add, contentDescription = "Add", tint = MaterialTheme.colorScheme.primary)
                     }
-                )
-
-                Spacer(modifier = Modifier.size(8.dp))
-
-                Button(
-                    onClick = {
-                        viewModel.addDish(newDishName)
-                        newDishName = ""
-                    },
-                    modifier = Modifier.height(56.dp),
-                    shape = RoundedCornerShape(16.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Add,
-                        contentDescription = "Add"
-                    )
-                }
-            }
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            Text(
-                text = "Your Dishes",
-                style = MaterialTheme.typography.headlineSmall
+                },
+                singleLine = true
             )
 
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(Modifier.height(24.dp))
+            
+            Text(
+                "Your Collection", 
+                style = MaterialTheme.typography.titleSmall,
+                color = MaterialTheme.colorScheme.secondary
+            )
+            
+            Spacer(Modifier.height(8.dp))
 
-            if (dishes.isEmpty()) {
-
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally
+            LazyColumn(
+                modifier = Modifier.fillMaxSize(),
+                verticalArrangement = Arrangement.spacedBy(10.dp),
+                contentPadding = PaddingValues(vertical = 8.dp)
+            ) {
+                items(items = dishes, key = { it.id }) { dish ->
+                    Surface(
+                        onClick = { onDishClick(dish.id) },
+                        shape = RoundedCornerShape(16.dp),
+                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+                        color = MaterialTheme.colorScheme.surface
                     ) {
-                        Icon(
-                            imageVector = Icons.Default.Restaurant,
-                            contentDescription = null,
-                            modifier = Modifier.size(64.dp),
-                            tint = MaterialTheme.colorScheme.primary
-                        )
-
-                        Spacer(modifier = Modifier.height(12.dp))
-
-                        Text(
-                            text = "No dishes yet",
-                            style = MaterialTheme.typography.titleMedium
-                        )
-
-                        Text(
-                            text = "Add your first dish above.",
-                            style = MaterialTheme.typography.bodyMedium
-                        )
-                    }
-                }
-
-            } else {
-
-                LazyColumn(
-                    modifier = Modifier.fillMaxSize(),
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    items(
-                        items = dishes,
-                        key = { it.id }
-                    ) { dish ->
-
-                        ElevatedCard(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clickable {
-                                    onDishClick(dish.id)
-                                },
-                            shape = RoundedCornerShape(20.dp),
-                            elevation = CardDefaults.elevatedCardElevation(
-                                defaultElevation = 4.dp
-                            )
-                        ) {
-
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(16.dp),
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-
-                                Box(
-                                    modifier = Modifier
-                                        .size(52.dp)
-                                        .clip(CircleShape)
-                                        .background(
-                                            MaterialTheme.colorScheme.primaryContainer
-                                        ),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Default.Restaurant,
-                                        contentDescription = null,
-                                        tint = MaterialTheme.colorScheme.onPrimaryContainer
-                                    )
-                                }
-
-                                Spacer(modifier = Modifier.size(12.dp))
-
-                                Column(
-                                    modifier = Modifier.weight(1f)
-                                ) {
-
-                                    Text(
-                                        text = dish.name,
-                                        style = MaterialTheme.typography.titleMedium
-                                    )
-
-                                    Spacer(modifier = Modifier.height(4.dp))
-
-                                    Text(
-                                        text = "${dish.recipes.size} recipe step(s)",
-                                        style = MaterialTheme.typography.bodySmall,
-                                        color = MaterialTheme.colorScheme.outline
-                                    )
-                                }
-
-                                IconButton(
-                                    onClick = {
-                                        dishBeingEdited = dish
+                        ListItem(
+                            headlineContent = { Text(dish.name, fontWeight = FontWeight.SemiBold) },
+                            supportingContent = { Text("${dish.recipes.size} steps") },
+                            colors = ListItemDefaults.colors(containerColor = Color.Transparent),
+                            trailingContent = {
+                                Row {
+                                    IconButton(onClick = { editingDish = dish }) {
+                                        Icon(Icons.Default.Edit, contentDescription = "Edit", Modifier.size(20.dp))
                                     }
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Default.Edit,
-                                        contentDescription = "Edit Dish",
-                                        tint = MaterialTheme.colorScheme.primary
-                                    )
-                                }
-
-                                IconButton(
-                                    onClick = {
-                                        viewModel.deleteDish(dish.id)
+                                    IconButton(onClick = { viewModel.deleteDish(dish.id) }) {
+                                        Icon(Icons.Default.Delete, contentDescription = "Delete", Modifier.size(20.dp), tint = MaterialTheme.colorScheme.error)
                                     }
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Default.Delete,
-                                        contentDescription = "Delete Dish",
-                                        tint = MaterialTheme.colorScheme.error
-                                    )
                                 }
                             }
-                        }
+                        )
                     }
                 }
             }
         }
     }
 
-    val editingDish = dishBeingEdited
-
-    if (editingDish != null) {
+    editingDish?.let { dish ->
         EditDialog(
             title = "Rename Dish",
-            initialText = editingDish.name,
+            initialText = dish.name,
             onConfirm = { newName ->
-                viewModel.updateDish(
-                    editingDish.id,
-                    newName
-                )
-                dishBeingEdited = null
-            },
-            onDismiss = {
-                dishBeingEdited = null
+                viewModel.updateDish(dish.id, newName)
+                editingDish = null
             }
-        )
+        ) { editingDish = null }
     }
 }
 
@@ -301,45 +122,23 @@ fun EditDialog(
     onConfirm: (String) -> Unit,
     onDismiss: () -> Unit
 ) {
-    var text by remember {
-        mutableStateOf(initialText)
-    }
-
+    var textState by remember { mutableStateOf(initialText) }
     AlertDialog(
         onDismissRequest = onDismiss,
-
-        title = {
-            Text(text = title)
-        },
-
+        title = { Text(title) },
         text = {
             OutlinedTextField(
-                value = text,
-                onValueChange = {
-                    text = it
-                },
-                modifier = Modifier.fillMaxWidth(),
-                singleLine = true,
-                shape = RoundedCornerShape(16.dp)
+                value = textState,
+                onValueChange = { textState = it },
+                shape = RoundedCornerShape(12.dp),
+                singleLine = true
             )
         },
-
         confirmButton = {
-            Button(
-                onClick = {
-                    onConfirm(text)
-                }
-            ) {
-                Text("Save")
-            }
+            Button(onClick = { onConfirm(textState) }) { Text("Save") }
         },
-
         dismissButton = {
-            TextButton(
-                onClick = onDismiss
-            ) {
-                Text("Cancel")
-            }
+            TextButton(onClick = onDismiss) { Text("Cancel") }
         }
     )
 }

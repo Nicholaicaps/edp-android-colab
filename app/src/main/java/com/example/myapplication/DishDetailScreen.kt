@@ -6,13 +6,15 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
@@ -23,116 +25,114 @@ fun DishDetailScreen(
     viewModel: DishViewModel,
     onBack: () -> Unit
 ) {
-    val dishes by viewModel.dishes.collectAsStateWithLifecycle()
-    val dish = dishes.find { it.id == dishId }
+    val allDishes by viewModel.dishes.collectAsStateWithLifecycle()
+    val currentDish = allDishes.find { it.id == dishId }
 
-    if (dish == null) {
-        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+    if (currentDish == null) {
+        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             Text("Dish not found")
         }
         return
     }
 
-    var newStep by remember { mutableStateOf("") }
-    var stepBeingEdited by remember { mutableStateOf<Recipe?>(null) }
+    var stepInput by remember { mutableStateOf("") }
+    var editingStep by remember { mutableStateOf<Recipe?>(null) }
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(dish.name) },
+                title = { Text(currentDish.name, fontWeight = FontWeight.Bold) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                     }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
-                )
+                }
             )
         }
-    ) { paddingValues ->
+    ) { padding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(paddingValues)
-                .padding(16.dp)
+                .padding(padding)
+                .padding(horizontal = 20.dp)
         ) {
-            Text("Recipe Steps", style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.primary)
-            Spacer(Modifier.height(8.dp))
-
-            // Add Recipe Step Row
             Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
             ) {
                 OutlinedTextField(
-                    value = newStep,
-                    onValueChange = { newStep = it },
-                    label = { Text("New step") },
-                    singleLine = true,
+                    value = stepInput,
+                    onValueChange = { stepInput = it },
+                    placeholder = { Text("Next step...") },
+                    modifier = Modifier.weight(1f),
                     shape = RoundedCornerShape(12.dp),
-                    modifier = Modifier.weight(1f)
+                    singleLine = true
                 )
                 Spacer(Modifier.width(8.dp))
-                Button(
+                FilledIconButton(
                     onClick = {
-                        viewModel.addRecipe(dishId, newStep)
-                        newStep = ""
+                        viewModel.addRecipe(dishId, stepInput)
+                        stepInput = ""
                     },
-                    modifier = Modifier.height(56.dp),
                     shape = RoundedCornerShape(12.dp)
                 ) {
-                    Icon(Icons.Default.Add, contentDescription = "Add Step")
-                    Spacer(Modifier.width(4.dp))
-                    Text("Add")
+                    Icon(Icons.AutoMirrored.Filled.Send, contentDescription = "Add", Modifier.size(20.dp))
                 }
             }
 
-            Spacer(Modifier.height(16.dp))
+            Spacer(Modifier.height(24.dp))
+            
+            Text("Instructions", style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary)
 
-            // Recipe Steps List
-            LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                itemsIndexed(items = dish.recipes, key = { _, r -> r.id }) { index, recipe ->
-                    ElevatedCard(
-                        elevation = CardDefaults.elevatedCardElevation(defaultElevation = 2.dp),
-                        modifier = Modifier.fillMaxWidth()
+            LazyColumn(
+                modifier = Modifier.fillMaxSize(),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+                contentPadding = PaddingValues(vertical = 12.dp)
+            ) {
+                itemsIndexed(items = currentDish.recipes, key = { _, r -> r.id }) { index, recipe ->
+                    Card(
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f)),
+                        shape = RoundedCornerShape(12.dp)
                     ) {
-                        Row(
-                            modifier = Modifier
-                                .padding(16.dp)
-                                .fillMaxWidth(),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Text(
-                                text = "${index + 1}. ${recipe.text}",
-                                style = MaterialTheme.typography.bodyMedium,
-                                modifier = Modifier.weight(1f)
-                            )
-                            IconButton(onClick = { stepBeingEdited = recipe }) {
-                                Icon(Icons.Default.Edit, contentDescription = "Edit Step", tint = MaterialTheme.colorScheme.primary)
+                        ListItem(
+                            leadingContent = { 
+                                Surface(
+                                    color = MaterialTheme.colorScheme.primary,
+                                    shape = RoundedCornerShape(8.dp),
+                                    modifier = Modifier.size(28.dp)
+                                ) {
+                                    Box(contentAlignment = Alignment.Center) {
+                                        Text((index + 1).toString(), color = Color.White, style = MaterialTheme.typography.bodySmall, fontWeight = FontWeight.Bold)
+                                    }
+                                }
+                            },
+                            headlineContent = { Text(recipe.text, style = MaterialTheme.typography.bodyMedium) },
+                            colors = ListItemDefaults.colors(containerColor = Color.Transparent),
+                            trailingContent = {
+                                Row {
+                                    IconButton(onClick = { editingStep = recipe }) {
+                                        Icon(Icons.Default.Edit, null, Modifier.size(18.dp))
+                                    }
+                                    IconButton(onClick = { viewModel.deleteRecipe(dishId, recipe.id) }) {
+                                        Icon(Icons.Default.Delete, null, Modifier.size(18.dp), tint = MaterialTheme.colorScheme.error)
+                                    }
+                                }
                             }
-                            IconButton(onClick = { viewModel.deleteRecipe(dishId, recipe.id) }) {
-                                Icon(Icons.Default.Delete, contentDescription = "Delete Step", tint = MaterialTheme.colorScheme.error)
-                            }
-                        }
+                        )
                     }
                 }
             }
         }
     }
 
-    // Edit Step Dialog
-    val editing = stepBeingEdited
-    if (editing != null) {
+    editingStep?.let { recipe ->
         EditDialog(
             title = "Edit Step",
-            initialText = editing.text,
-            onConfirm = { newText ->
-                viewModel.updateRecipe(dishId, editing.id, newText)
-                stepBeingEdited = null
-            },
-            onDismiss = { stepBeingEdited = null }
-        )
+            initialText = recipe.text,
+            onConfirm = { updatedText ->
+                viewModel.updateRecipe(dishId, recipe.id, updatedText)
+                editingStep = null
+            }
+        ) { editingStep = null }
     }
 }

@@ -1,4 +1,5 @@
 package com.example.myapplication
+
 import androidx.compose.runtime.Composable
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavType
@@ -16,17 +17,13 @@ fun RecipeApp() {
         navController = navController,
         startDestination = "dish_list"
     ) {
-
         composable(route = "dish_list") {
             DishListScreen(
-                viewModel = viewModel,
-                onDishClick = { dishId ->
-                    // TODO 6 (15 pts): Navigate to detail screen
-                    navController.navigate("dish_detail/$dishId")
-                }
-            )
+                viewModel = viewModel
+            ) { dishId ->
+                navController.navigate("dish_detail/$dishId")
+            }
         }
-
 
         composable(
             route = "dish_detail/{dishId}",
