@@ -11,8 +11,8 @@ interface ChatApiService {
 
     @GET("messages")
     suspend fun getMessages(
-        @Query("sortBy") sortBy: String = "createdAt",
-        @Query("order") order: String = "desc"
+        @Query("sortBy") sortBy: String,
+        @Query("order") order: String
     ): List<MessageDto>
 
     @POST("messages")

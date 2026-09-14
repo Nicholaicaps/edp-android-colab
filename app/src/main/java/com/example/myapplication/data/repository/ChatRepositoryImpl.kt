@@ -9,6 +9,7 @@ import com.example.myapplication.data.network.dto.toEntity
 import com.example.myapplication.domain.ChatRepository
 import com.example.myapplication.domain.Message
 import kotlinx.serialization.SerializationException
+import retrofit2.HttpException
 import java.io.IOException
 import java.net.SocketTimeoutException
 import java.net.UnknownHostException
@@ -20,7 +21,7 @@ class ChatRepositoryImpl(
 
     override suspend fun getMessages(): AppResult<List<Message>> {
         val result = safeCall { 
-            val messages = api.getMessages().toDomain()
+            val messages = api.getMessages("createdAt", "desc").toDomain()
             dao.insertAll(messages.map { it.toEntity() })
             messages
         }
@@ -45,6 +46,8 @@ class ChatRepositoryImpl(
             AppResult.Failure.NoInternet
         } catch (e: SocketTimeoutException) {
             AppResult.Failure.Timeout
+        } catch (e: HttpException) {
+            AppResult.Failure.Unknown("API Error: ${e.code()}")
         } catch (e: SerializationException) {
             android.util.Log.e("ChatRepository", "Parsing error", e)
             AppResult.Failure.Unknown("Data format error: ${e.message}")
