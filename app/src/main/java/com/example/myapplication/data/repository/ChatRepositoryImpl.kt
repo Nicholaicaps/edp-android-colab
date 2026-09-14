@@ -8,6 +8,7 @@ import com.example.myapplication.data.network.dto.toDomain
 import com.example.myapplication.data.network.dto.toEntity
 import com.example.myapplication.domain.ChatRepository
 import com.example.myapplication.domain.Message
+import kotlinx.serialization.SerializationException
 import java.io.IOException
 import java.net.SocketTimeoutException
 import java.net.UnknownHostException
@@ -18,14 +19,16 @@ class ChatRepositoryImpl(
 ) : ChatRepository {
 
     override suspend fun getMessages(): AppResult<List<Message>> {
-        val result = safeCall { api.getMessages().toDomain() }
-        if (result is AppResult.Success) {
-            dao.insertAll(result.data.map { it.toEntity() })
-            return result
+        val result = safeCall { 
+            val messages = api.getMessages().toDomain()
+            dao.insertAll(messages.map { it.toEntity() })
+            messages
         }
+        
+        if (result is AppResult.Success) return result
 
-        val saved = dao.getAll().map { it.toDomain() }
-        return if (saved.isNotEmpty()) AppResult.Success(saved) else result
+        val saved = safeCall { dao.getAll().map { it.toDomain() } }
+        return if (saved is AppResult.Success && saved.data.isNotEmpty()) saved else result
     }
 
     override suspend fun sendMessage(sender: String, text: String): AppResult<Unit> =
@@ -36,9 +39,19 @@ class ChatRepositoryImpl(
         }
 
     private inline fun <T> safeCall(block: () -> T): AppResult<T> =
-        try { AppResult.Success(block()) }
-        catch (e: UnknownHostException)   { AppResult.Failure.NoInternet }
-        catch (e: SocketTimeoutException) { AppResult.Failure.Timeout }
-        catch (e: IOException)            { AppResult.Failure.NoInternet }
-        catch (e: Exception)              { AppResult.Failure.Unknown(e.message) }
+        try {
+            AppResult.Success(block())
+        } catch (e: UnknownHostException) {
+            AppResult.Failure.NoInternet
+        } catch (e: SocketTimeoutException) {
+            AppResult.Failure.Timeout
+        } catch (e: SerializationException) {
+            android.util.Log.e("ChatRepository", "Parsing error", e)
+            AppResult.Failure.Unknown("Data format error: ${e.message}")
+        } catch (e: IOException) {
+            AppResult.Failure.NoInternet
+        } catch (e: Exception) {
+            android.util.Log.e("ChatRepository", "Unknown error", e)
+            AppResult.Failure.Unknown(e.message)
+        }
 }

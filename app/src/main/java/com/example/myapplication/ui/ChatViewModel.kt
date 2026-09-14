@@ -37,9 +37,9 @@ class ChatViewModel(
             uiState = ChatUiState.Loading
             uiState = when (val r = repository.getMessages()) {
                 is AppResult.Success -> if (r.data.isEmpty()) ChatUiState.Empty else ChatUiState.Ready(r.data)
-                AppResult.Failure.NoInternet -> ChatUiState.Error("No internet connection.")
-                AppResult.Failure.Timeout -> ChatUiState.Error("The server took too long.")
-                is AppResult.Failure -> ChatUiState.Error("Something went wrong.")
+                is AppResult.Failure.NoInternet -> ChatUiState.Error("No internet connection.")
+                is AppResult.Failure.Timeout -> ChatUiState.Error("The server took too long.")
+                is AppResult.Failure.Unknown -> ChatUiState.Error(r.message ?: "Something went wrong.")
             }
         }
     }
